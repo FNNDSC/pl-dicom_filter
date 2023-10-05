@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.authors="FNNDSC <dev@babyMRI.org>" \
       org.opencontainers.image.title="ChRIS Plugin Title" \
       org.opencontainers.image.description="A ChRIS plugin that..."
 
-ARG SRCDIR=/usr/local/src/app
+ARG SRCDIR=/usr/local/src/dicom_filter
 WORKDIR ${SRCDIR}
 
 COPY requirements.txt .
@@ -21,4 +21,4 @@ RUN pip install ".[${extras_require}]" \
     && cd / && rm -rf ${SRCDIR}
 WORKDIR /
 
-CMD ["commandname"]
+CMD ["dicom_filter"]

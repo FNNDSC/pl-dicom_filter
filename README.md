@@ -126,11 +126,11 @@ docker build -t localhost/fnndsc/pl-appname .
 
 ### Running
 
-Mount the source code `app.py` into a container to try out changes without rebuild.
+Mount the source code `dicom_filter.py` into a container to try out changes without rebuild.
 
 ```shell
 docker run --rm -it --userns=host -u $(id -u):$(id -g) \
-    -v $PWD/app.py:/usr/local/lib/python3.11/site-packages/app.py:ro \
+    -v $PWD/dicom_filter.py:/usr/local/lib/python3.11/site-packages/dicom_filter.py:ro \
     -v $PWD/in:/incoming:ro -v $PWD/out:/outgoing:rw -w /outgoing \
     localhost/fnndsc/pl-appname commandname /incoming /outgoing
 ```

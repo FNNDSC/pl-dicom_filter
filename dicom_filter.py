@@ -6,17 +6,28 @@ from argparse import ArgumentParser, Namespace, ArgumentDefaultsHelpFormatter
 from chris_plugin import chris_plugin, PathMapper
 import pydicom as dicom
 import cv2
+import json
 
 __version__ = '1.0.0'
 
 DISPLAY_TITLE = r"""
-ChRIS Plugin Template Title
-"""
+       _           _ _                        __ _ _ _            
+      | |         | (_)                      / _(_) | |           
+ _ __ | |______ __| |_  ___ ___  _ __ ___   | |_ _| | |_ ___ _ __ 
+| '_ \| |______/ _` | |/ __/ _ \| '_ ` _ \  |  _| | | __/ _ \ '__|
+| |_) | |     | (_| | | (_| (_) | | | | | | | | | | | ||  __/ |   
+| .__/|_|      \__,_|_|\___\___/|_| |_| |_| |_| |_|_|\__\___|_|   
+| |                                     ______                    
+|_|                                    |______|                   
+
+                      
+""" + "\t\t -- version " + __version__ + " --\n\n"
+
 
 
 parser = ArgumentParser(description='A ChRIS plugin to filter dicoms using filters on dicom tags',
                         formatter_class=ArgumentDefaultsHelpFormatter)
-parser.add_argument('-d', '--dicomFilter', default="", type=str,
+parser.add_argument('-d', '--dicomFilter', default="{}", type=str,
                     help='comma separated dicom tags with values')
 parser.add_argument('-f', '--fileFilter', default='dcm', type=str,
                     help='input file filter glob')
@@ -62,7 +73,7 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
         # It is recommended that you put your functionality in a helper function, so that
         # it is more legible and can be unit tested.
         print(f"Reading input file from {str(input_file)}")
-        image_file = convert_to_image(str(input_file))
+        image_file = convert_to_image(str(input_file), options.dicomFilter)
         if image_file is None:
             continue
         output_file = str(output_file).replace('dcm','png')
@@ -70,17 +81,22 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
         cv2.imwrite(output_file, image_file)
 
 
-def convert_to_image(dcm_file):
+def convert_to_image(dcm_file, filters):
     """
 
     """
+    d_filter = json.loads(filters)
     ds = dicom.dcmread(dcm_file)
-    print(ds.data_element("SOPClassUID"))
-    if "Ultrasound Image Storage" in  str(ds.data_element("SOPClassUID")):
-        pixel_array_numpy = ds.pixel_array
-        return pixel_array_numpy
-    print(f"file: {dcm_file} doesn't match filter criteria")
-    return None
+    for key, value in d_filter.items():
+        if value in  str(ds.data_element(key)):
+            continue
+        else:
+            print(f"file: {dcm_file} doesn't match filter criteria")
+            print(f"expected: {value} found: {ds.data_element(key)}")
+            return None
+    pixel_array_numpy = ds.pixel_array
+    return pixel_array_numpy
+
 
 
 

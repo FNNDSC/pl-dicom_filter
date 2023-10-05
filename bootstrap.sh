@@ -190,7 +190,7 @@ sed "s/name='.*'/name='$appname_without_prefix'/" setup.py \
   > $temp_file
 mv $temp_file setup.py
 
-# app.py
+# dicom_filter.py
 
 # FIGlet over HTTPS, since it's probably not installed locally
 function figlet_wrapper () {
@@ -214,7 +214,7 @@ inject_figleted_title "$figleted_title" \
   | sed "s/title='My ChRIS plugin'/title='$escaped_title'/" \
   | sed "s/description='cli description'/description='$escaped_description'/" \
   > "$SCRIPT_NAME.py"
-rm app.py
+rm dicom_filter.py
 
 # tests/
 for test_file in tests/*.py; do
