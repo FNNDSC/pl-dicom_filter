@@ -4,6 +4,8 @@ from pathlib import Path
 from argparse import ArgumentParser, Namespace, ArgumentDefaultsHelpFormatter
 
 from chris_plugin import chris_plugin, PathMapper
+import pydicom as dicom
+import cv2
 
 __version__ = '1.0.0'
 
@@ -12,13 +14,11 @@ ChRIS Plugin Template Title
 """
 
 
-parser = ArgumentParser(description='!!!CHANGE ME!!! An example ChRIS plugin which '
-                                    'counts the number of occurrences of a given '
-                                    'word in text files.',
+parser = ArgumentParser(description='A ChRIS plugin to filter dicoms using filters on dicom tags',
                         formatter_class=ArgumentDefaultsHelpFormatter)
-parser.add_argument('-w', '--word', required=True, type=str,
-                    help='word to count')
-parser.add_argument('-p', '--pattern', default='**/*.txt', type=str,
+parser.add_argument('-d', '--dicomFilter', default="", type=str,
+                    help='comma separated dicom tags with values')
+parser.add_argument('-f', '--fileFilter', default='dcm', type=str,
                     help='input file filter glob')
 parser.add_argument('-V', '--version', action='version',
                     version=f'%(prog)s {__version__}')
@@ -56,14 +56,40 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
     #
     # Refer to the documentation for more options, examples, and advanced uses e.g.
     # adding a progress bar and parallelism.
-    mapper = PathMapper.file_mapper(inputdir, outputdir, glob=options.pattern, suffix='.count.txt')
+    mapper = PathMapper.file_mapper(inputdir, outputdir, glob=f"**/*.{options.fileFilter}")
     for input_file, output_file in mapper:
         # The code block below is a small and easy example of how to use a ``PathMapper``.
         # It is recommended that you put your functionality in a helper function, so that
         # it is more legible and can be unit tested.
-        data = input_file.read_text()
-        frequency = data.count(options.word)
-        output_file.write_text(str(frequency))
+        print(f"Reading input file from {str(input_file)}")
+        image_file = convert_to_image(str(input_file))
+        if image_file is None:
+            continue
+        output_file = str(output_file).replace('dcm','png')
+        print(f"Saving output file as {str(output_file)}")
+        cv2.imwrite(output_file, image_file)
+
+
+def convert_to_image(dcm_file):
+    """
+
+    """
+    ds = dicom.dcmread(dcm_file)
+    print(ds.data_element("SOPClassUID"))
+    if "Ultrasound Image Storage" in  str(ds.data_element("SOPClassUID")):
+        pixel_array_numpy = ds.pixel_array
+        return pixel_array_numpy
+    print(f"file: {dcm_file} doesn't match filter criteria")
+    return None
+
+
+
+def pass_filter(tags, filter, dicom):
+    """
+
+    """
+    pass
+
 
 
 if __name__ == '__main__':

@@ -1,2 +1,4 @@
 chris_plugin==0.2.1
+opencv-python
+pydicom
 
