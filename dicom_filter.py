@@ -8,7 +8,7 @@ import pydicom as dicom
 import cv2
 import json
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -22,7 +22,6 @@ DISPLAY_TITLE = r"""
 
                       
 """ + "\t\t -- version " + __version__ + " --\n\n"
-
 
 parser = ArgumentParser(description='A ChRIS plugin to filter dicoms using filters on dicom tags',
                         formatter_class=ArgumentDefaultsHelpFormatter)
@@ -41,10 +40,10 @@ parser.add_argument('-V', '--version', action='version',
 @chris_plugin(
     parser=parser,
     title='My ChRIS plugin',
-    category='',                 # ref. https://chrisstore.co/plugins
-    min_memory_limit='2Gi',    # supported units: Mi, Gi
-    min_cpu_limit='1000m',       # millicores, e.g. "1000m" = 1 CPU core
-    min_gpu_limit=0              # set min_gpu_limit=1 to enable GPU
+    category='',  # ref. https://chrisstore.co/plugins
+    min_memory_limit='2Gi',  # supported units: Mi, Gi
+    min_cpu_limit='1000m',  # millicores, e.g. "1000m" = 1 CPU core
+    min_gpu_limit=0  # set min_gpu_limit=1 to enable GPU
 )
 def main(options: Namespace, inputdir: Path, outputdir: Path):
     """
@@ -75,7 +74,7 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
         image_file = convert_to_image(str(input_file), options.dicomFilter)
         if image_file is None:
             continue
-        output_file = str(output_file).replace('dcm','png')
+        output_file = str(output_file).replace('dcm', 'png')
         print(f"Saving output file as {str(output_file)}")
         cv2.imwrite(output_file, image_file)
 
@@ -84,10 +83,15 @@ def convert_to_image(dcm_file, filters):
     """
 
     """
+    ds = None
     d_filter = json.loads(filters)
-    ds = dicom.dcmread(dcm_file)
+    try:
+        ds = dicom.dcmread(dcm_file)
+    except Exception as ex:
+        print(f"unable to read dicom file: {ex}")
+        return None
     for key, value in d_filter.items():
-        if value in  str(ds.data_element(key)):
+        if value in str(ds.data_element(key)):
             continue
         else:
             print(f"file: {dcm_file} doesn't match filter criteria")
@@ -97,14 +101,11 @@ def convert_to_image(dcm_file, filters):
     return pixel_array_numpy
 
 
-
-
 def pass_filter(tags, filter, dicom):
     """
 
     """
     pass
-
 
 
 if __name__ == '__main__':
