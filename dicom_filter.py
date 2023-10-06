@@ -8,7 +8,7 @@ import pydicom as dicom
 import cv2
 import json
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -22,7 +22,6 @@ DISPLAY_TITLE = r"""
 
                       
 """ + "\t\t -- version " + __version__ + " --\n\n"
-
 
 
 parser = ArgumentParser(description='A ChRIS plugin to filter dicoms using filters on dicom tags',
