@@ -8,7 +8,7 @@ import pydicom as dicom
 import cv2
 import json
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -42,7 +42,7 @@ parser.add_argument('-V', '--version', action='version',
     parser=parser,
     title='My ChRIS plugin',
     category='',                 # ref. https://chrisstore.co/plugins
-    min_memory_limit='100Mi',    # supported units: Mi, Gi
+    min_memory_limit='2Gi',    # supported units: Mi, Gi
     min_cpu_limit='1000m',       # millicores, e.g. "1000m" = 1 CPU core
     min_gpu_limit=0              # set min_gpu_limit=1 to enable GPU
 )

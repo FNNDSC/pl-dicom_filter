@@ -4,8 +4,8 @@
 FROM docker.io/python:3.11.3-slim-bullseye
 
 LABEL org.opencontainers.image.authors="FNNDSC <dev@babyMRI.org>" \
-      org.opencontainers.image.title="ChRIS Plugin Title" \
-      org.opencontainers.image.description="A ChRIS plugin that..."
+      org.opencontainers.image.title="A dicom filter plugin" \
+      org.opencontainers.image.description="A ChRIS plugin to filter dicoms using filters on dicom tags"
 
 ARG SRCDIR=/usr/local/src/dicom_filter
 WORKDIR ${SRCDIR}
