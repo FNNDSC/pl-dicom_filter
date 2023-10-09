@@ -31,6 +31,8 @@ parser.add_argument('-f', '--fileFilter', default='dcm', type=str,
                     help='input file filter glob')
 parser.add_argument('-V', '--version', action='version',
                     version=f'%(prog)s {__version__}')
+parser.add_argument('-f', '--outputType', default='dcm', type=str,
+                    help='input file filter glob')
 
 
 # The main function of this *ChRIS* plugin is denoted by this ``@chris_plugin`` "decorator."
@@ -67,45 +69,59 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
     # adding a progress bar and parallelism.
     mapper = PathMapper.file_mapper(inputdir, outputdir, glob=f"**/*.{options.fileFilter}")
     for input_file, output_file in mapper:
-        # The code block below is a small and easy example of how to use a ``PathMapper``.
-        # It is recommended that you put your functionality in a helper function, so that
-        # it is more legible and can be unit tested.
-        print(f"Reading input file from {str(input_file)}")
-        image_file = convert_to_image(str(input_file), options.dicomFilter)
-        if image_file is None:
+        # Read each input file from the input directory that matches the input filter specified
+        dcm_img = read_input_dicom(input_file, options.dicomFilter)
+
+        # check if a valid image file is returned
+        if dcm_img is None:
             continue
-        output_file = str(output_file).replace('dcm', 'png')
-        print(f"Saving output file as {str(output_file)}")
-        cv2.imwrite(output_file, image_file)
+
+        # Save the file in o/p directory in the specified o/p type\
+        if options.outputType == "dcm":
+            save_dicom(input_file, output_file)
+        else:
+            save_as_image(input_file, output_file, options.outputType)
 
 
-def convert_to_image(dcm_file, filters):
+def save_as_image(dcm_file, output_file_path, file_ext):
     """
+    Save the pixel array of a dicom file as an image file
+    """
+    pixel_array_numpy = dcm_file.pixel_array
+    output_file_path = str(output_file).replace('dcm', file_ext)
+    print(f"Saving output file as {output_file_path}")
+    cv2.imwrite(output_file_path, pixel_array_numpy)
 
+
+def read_input_dicom(input_file_path, filters):
+    """
+    1) Read an input dicom file
+    2) Check if the dicom headers match the specified filters
+    3) Return the dicom data set
     """
     ds = None
     d_filter = json.loads(filters)
     try:
-        ds = dicom.dcmread(dcm_file)
+        print(f"Reading input file : {input_file_path.name}")
+        ds = dicom.dcmread(str(input_file_path))
     except Exception as ex:
         print(f"unable to read dicom file: {ex}")
         return None
+
     for key, value in d_filter.items():
         if value in str(ds.data_element(key)):
             continue
         else:
-            print(f"file: {dcm_file} doesn't match filter criteria")
+            print(f"file: {input_file_path.name} doesn't match filter criteria")
             print(f"expected: {value} found: {ds.data_element(key)}")
             return None
-    pixel_array_numpy = ds.pixel_array
-    return pixel_array_numpy
 
+    return ds
 
-def pass_filter(tags, filter, dicom):
+def save_dicom(dicom_file, output_path):
     """
-
+    Save a dicom file to an output path
     """
-    pass
 
 
 if __name__ == '__main__':
