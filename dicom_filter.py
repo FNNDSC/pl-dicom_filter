@@ -78,7 +78,7 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
 
         # Save the file in o/p directory in the specified o/p type\
         if options.outputType == "dcm":
-            save_dicom(input_file, output_file)
+            save_dicom(dcm_img, output_file)
         else:
             save_as_image(input_file, output_file, options.outputType)
 
