@@ -80,7 +80,7 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
         if options.outputType == "dcm":
             save_dicom(dcm_img, output_file)
         else:
-            save_as_image(input_file, output_file, options.outputType)
+            save_as_image(dcm_img, output_file, options.outputType)
 
 
 def save_as_image(dcm_file, output_file_path, file_ext):
