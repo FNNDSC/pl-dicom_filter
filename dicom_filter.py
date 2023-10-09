@@ -8,7 +8,7 @@ import pydicom as dicom
 import cv2
 import json
 
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -81,6 +81,7 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
             save_dicom(dcm_img, output_file)
         else:
             save_as_image(dcm_img, output_file, options.outputType)
+        print("\n\n")
 
 
 def save_as_image(dcm_file, output_file_path, file_ext):
@@ -105,7 +106,7 @@ def read_input_dicom(input_file_path, filters):
         print(f"Reading input file : {input_file_path.name}")
         ds = dicom.dcmread(str(input_file_path))
     except Exception as ex:
-        print(f"unable to read dicom file: {ex}")
+        print(f"unable to read dicom file: {ex} \n")
         return None
 
     for key, value in d_filter.items():
@@ -113,7 +114,7 @@ def read_input_dicom(input_file_path, filters):
             continue
         else:
             print(f"file: {input_file_path.name} doesn't match filter criteria")
-            print(f"expected: {value} found: {ds.data_element(key)}")
+            print(f"expected: {value} found: {ds.data_element(key)} \n")
             return None
 
     return ds
@@ -122,6 +123,7 @@ def save_dicom(dicom_file, output_path):
     """
     Save a dicom file to an output path
     """
+    print(f"Saving dicom file: {output_path.name}")
     dicom_file.save_as(str(output_path))
 
 
