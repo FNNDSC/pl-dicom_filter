@@ -31,7 +31,7 @@ parser.add_argument('-f', '--fileFilter', default='dcm', type=str,
                     help='input file filter glob')
 parser.add_argument('-V', '--version', action='version',
                     version=f'%(prog)s {__version__}')
-parser.add_argument('-f', '--outputType', default='dcm', type=str,
+parser.add_argument('-t', '--outputType', default='dcm', type=str,
                     help='input file filter glob')
 
 
@@ -122,6 +122,7 @@ def save_dicom(dicom_file, output_path):
     """
     Save a dicom file to an output path
     """
+    dicom_file.save_as(str(output_path))
 
 
 if __name__ == '__main__':
