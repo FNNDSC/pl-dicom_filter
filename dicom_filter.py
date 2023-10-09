@@ -8,7 +8,7 @@ import pydicom as dicom
 import cv2
 import json
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -88,7 +88,7 @@ def save_as_image(dcm_file, output_file_path, file_ext):
     Save the pixel array of a dicom file as an image file
     """
     pixel_array_numpy = dcm_file.pixel_array
-    output_file_path = str(output_file).replace('dcm', file_ext)
+    output_file_path = str(output_file_path).replace('dcm', file_ext)
     print(f"Saving output file as {output_file_path}")
     cv2.imwrite(output_file_path, pixel_array_numpy)
 
