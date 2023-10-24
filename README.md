@@ -34,7 +34,7 @@ apptainer exec docker://fnndsc/pl-dicom_filter dicom_filter --help
 
 ## Examples
 
-`dicom_unpack` requires two positional arguments: a directory containing
+`dicom_filter` requires two positional arguments: a directory containing
 input data, and a directory where to create output data.
 First, create the input directory and move input data into it.
 
@@ -53,7 +53,7 @@ Instructions for developers.
 Build a local container image:
 
 ```shell
-docker build -t localhost/fnndsc/pl-dicom_unpack .
+docker build -t localhost/fnndsc/pl-dicom_filter .
 ```
 
 ### Running
@@ -85,7 +85,7 @@ This section is about how to do those steps manually.
 
 ### Increase Version Number
 
-Increase the version number in `setup.py` and commit this file.
+Increase the version number in `dicom_filter.py` and commit this file.
 
 ### Push Container Image
 
