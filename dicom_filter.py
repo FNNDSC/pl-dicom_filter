@@ -9,7 +9,7 @@ import cv2
 import json
 from pflog import pflog
 
-__version__ = '1.0.2'
+__version__ = '1.1.0'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -77,7 +77,7 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
     #
     # Refer to the documentation for more options, examples, and advanced uses e.g.
     # adding a progress bar and parallelism.
-    mapper = PathMapper.file_mapper(inputdir, outputdir, glob=f"**/*.{options.fileFilter}")
+    mapper = PathMapper.file_mapper(inputdir, outputdir, glob=f"**/*.{options.fileFilter}",fail_if_empty=False)
     for input_file, output_file in mapper:
         # Read each input file from the input directory that matches the input filter specified
         dcm_img = read_input_dicom(input_file, options.dicomFilter)
