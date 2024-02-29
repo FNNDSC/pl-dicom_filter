@@ -9,7 +9,7 @@ import cv2
 import json
 from pflog import pflog
 
-__version__ = '1.1.0'
+__version__ = '1.1.2'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -101,7 +101,7 @@ def save_as_image(dcm_file, output_file_path, file_ext):
     pixel_array_numpy = dcm_file.pixel_array
     output_file_path = str(output_file_path).replace('dcm', file_ext)
     print(f"Saving output file as {output_file_path}")
-    cv2.imwrite(output_file_path, pixel_array_numpy)
+    cv2.imwrite(output_file_path, cv2.cvtColor(pixel_array_numpy,cv2.COLOR_RGB2BGR))
 
 
 def read_input_dicom(input_file_path, filters):
