@@ -2,14 +2,14 @@
 
 from pathlib import Path
 from argparse import ArgumentParser, Namespace, ArgumentDefaultsHelpFormatter
-
+from pydicom.pixel_data_handlers import convert_color_space
 from chris_plugin import chris_plugin, PathMapper
 import pydicom as dicom
 import cv2
 import json
 from pflog import pflog
 
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -101,7 +101,10 @@ def save_as_image(dcm_file, output_file_path, file_ext):
     pixel_array_numpy = dcm_file.pixel_array
     output_file_path = str(output_file_path).replace('dcm', file_ext)
     print(f"Saving output file as {output_file_path}")
+
+    # Prevents color inversion happening while saving as images
     cv2.imwrite(output_file_path, cv2.cvtColor(pixel_array_numpy,cv2.COLOR_RGB2BGR))
+
 
 
 def read_input_dicom(input_file_path, filters):
