@@ -3,3 +3,5 @@ opencv-python
 pydicom
 pflog==1.2.26
 pftel-client~=1.0.6
+pylibjpeg
+pylibjpeg-libjpeg

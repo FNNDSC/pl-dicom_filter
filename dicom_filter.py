@@ -9,7 +9,7 @@ import cv2
 import json
 from pflog import pflog
 
-__version__ = '1.1.2'
+__version__ = '1.1.4'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
