@@ -8,8 +8,9 @@ import pydicom as dicom
 import cv2
 import json
 from pflog import pflog
-
-__version__ = '1.1.5'
+from pydicom.pixel_data_handlers import convert_color_space
+import numpy as np
+__version__ = '1.1.6'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -103,7 +104,8 @@ def save_as_image(dcm_file, output_file_path, file_ext):
     print(f"Saving output file as {output_file_path}")
 
     # Prevents color inversion happening while saving as images
-    cv2.imwrite(output_file_path, cv2.cvtColor(pixel_array_numpy,cv2.COLOR_RGB2BGR))
+    rgb = convert_color_space(pixel_array_numpy, "YBR_FULL", "RGB")
+    cv2.imwrite(output_file_path,rgb)
 
 
 
