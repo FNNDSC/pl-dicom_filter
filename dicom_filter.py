@@ -10,7 +10,7 @@ import json
 from pflog import pflog
 from pydicom.pixel_data_handlers import convert_color_space
 import numpy as np
-__version__ = '1.1.8'
+__version__ = '1.2.0'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -34,7 +34,7 @@ parser.add_argument('-f', '--fileFilter', default='dcm', type=str,
 parser.add_argument('-V', '--version', action='version',
                     version=f'%(prog)s {__version__}')
 parser.add_argument('-t', '--outputType', default='dcm', type=str,
-                    help='input file filter glob')
+                    help='output file type(extension only)')
 parser.add_argument(  '--pftelDB',
                     dest        = 'pftelDB',
                     default     = '',
@@ -102,10 +102,16 @@ def save_as_image(dcm_file, output_file_path, file_ext):
     pixel_array_numpy = dcm_file.pixel_array
     output_file_path = str(output_file_path).replace('dcm', file_ext)
     print(f"Saving output file as {output_file_path}")
+    print(f"Photometric Interpretation is {dcm_file.PhotometricInterpretation}")
 
     # Prevents color inversion happening while saving as images
-    rgb = convert_color_space(pixel_array_numpy, "YBR_FULL", "RGB")
-    cv2.imwrite(output_file_path,cv2.cvtColor(rgb,cv2.COLOR_RGB2BGR))
+    if 'YBR' in dcm_file.PhotometricInterpretation:
+        print(f"Explicitly converting color space to RGB")
+        pixel_array_numpy = convert_color_space(pixel_array_numpy, "YBR_FULL", "RGB")
+
+    cv2.imwrite(output_file_path,cv2.cvtColor(pixel_array_numpy,cv2.COLOR_RGB2BGR))
+
+
 
 
 
