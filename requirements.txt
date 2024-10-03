@@ -1,4 +1,4 @@
-chris_plugin==0.2.1
+chris_plugin>=0.3.0
 opencv-python
 pydicom
 pflog==1.2.26
