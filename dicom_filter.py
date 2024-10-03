@@ -10,7 +10,7 @@ import json
 from pflog import pflog
 from pydicom.pixel_data_handlers import convert_color_space
 import numpy as np
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
