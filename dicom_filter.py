@@ -10,7 +10,7 @@ import json
 from pflog import pflog
 from pydicom.pixel_data_handlers import convert_color_space
 import numpy as np
-__version__ = '1.2.2'
+__version__ = '1.2.3'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -35,6 +35,8 @@ parser.add_argument('-V', '--version', action='version',
                     version=f'%(prog)s {__version__}')
 parser.add_argument('-t', '--outputType', default='dcm', type=str,
                     help='output file type(extension only)')
+parser.add_argument('-e', '--exclude', default=False, action="store_true",
+                    help='True means filter out, False means filter in.')
 parser.add_argument(  '--pftelDB',
                     dest        = 'pftelDB',
                     default     = '',
@@ -81,7 +83,7 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
     mapper = PathMapper.file_mapper(inputdir, outputdir, glob=f"**/*.{options.fileFilter}",fail_if_empty=False)
     for input_file, output_file in mapper:
         # Read each input file from the input directory that matches the input filter specified
-        dcm_img = read_input_dicom(input_file, options.dicomFilter)
+        dcm_img = read_input_dicom(input_file, options.dicomFilter, options.exclude)
 
         # check if a valid image file is returned
         if dcm_img is None:
@@ -115,7 +117,7 @@ def save_as_image(dcm_file, output_file_path, file_ext):
 
 
 
-def read_input_dicom(input_file_path, filters):
+def read_input_dicom(input_file_path, filters, exclude):
     """
     1) Read an input dicom file
     2) Check if the dicom headers match the specified filters
@@ -131,11 +133,18 @@ def read_input_dicom(input_file_path, filters):
         return None
 
     for key, value in d_filter.items():
-        if value in str(ds.data_element(key)):
-            continue
-        else:
-            print(f"file: {input_file_path.name} doesn't match filter criteria")
-            print(f"expected: {value} found: {ds.data_element(key)} \n")
+        try:
+            if value in str(ds.data_element(key)) and not exclude:
+                continue
+            else:
+                print(f"expected: {value} found: {ds.data_element(key)} exclude: {exclude} \n")
+                if exclude:
+                    return ds
+                else:
+                    print(f"file: {input_file_path.name} doesn't match filter criteria")
+                    return None
+        except Exception as ex:
+            print(f"Exception : {ex}")
             return None
 
     return ds
