@@ -10,7 +10,7 @@ import json
 from pflog import pflog
 from pydicom.pixel_data_handlers import convert_color_space
 import numpy as np
-__version__ = '1.2.4'
+__version__ = '1.2.5'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -134,23 +134,23 @@ def read_input_dicom(input_file_path, filters, exclude):
 
     for key, value in d_filter.items():
         try:
-            if value in str(ds.data_element(key)) and not exclude:
+            print(f"expected: {value} found: {ds.data_element(key)} exclude: {exclude} \n")
+            if value in str(ds.data_element(key)):
                 continue
             else:
-                print(f"expected: {value} found: {ds.data_element(key)} exclude: {exclude} \n")
                 if exclude:
                     return ds
-                else:
-                    print(f"file: {input_file_path.name} doesn't match filter criteria")
-                    return None
-        except Exception as ex:
-            if exclude:
-                return ds
-            else:
-                print(f"Exception : {ex}")
+                print(f"file: {input_file_path.name} doesn't match filter criteria")
                 return None
+        except Exception as ex:
+            print(f"Exception : {ex}")
+            return None
 
+    if exclude:
+        print(f"file: {input_file_path.name} matches filter criteria")
+        return None
     return ds
+
 
 def save_dicom(dicom_file, output_path):
     """
