@@ -144,8 +144,11 @@ def read_input_dicom(input_file_path, filters, exclude):
                     print(f"file: {input_file_path.name} doesn't match filter criteria")
                     return None
         except Exception as ex:
-            print(f"Exception : {ex}")
-            return None
+            if exclude:
+                return ds
+            else:
+                print(f"Exception : {ex}")
+                return None
 
     return ds
 
