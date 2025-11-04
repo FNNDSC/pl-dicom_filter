@@ -10,7 +10,7 @@ import json
 from pflog import pflog
 from pydicom.pixel_data_handlers import convert_color_space
 import numpy as np
-__version__ = '1.2.5'
+__version__ = '1.2.6'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -73,13 +73,6 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
 
     print(DISPLAY_TITLE)
 
-    # Typically it's easier to think of programs as operating on individual files
-    # rather than directories. The helper functions provided by a ``PathMapper``
-    # object make it easy to discover input files and write to output files inside
-    # the given paths.
-    #
-    # Refer to the documentation for more options, examples, and advanced uses e.g.
-    # adding a progress bar and parallelism.
     mapper = PathMapper.file_mapper(inputdir, outputdir, glob=f"**/*.{options.fileFilter}",fail_if_empty=False)
     for input_file, output_file in mapper:
         # Read each input file from the input directory that matches the input filter specified
@@ -128,6 +121,10 @@ def read_input_dicom(input_file_path, filters, exclude):
     try:
         print(f"Reading input file : {input_file_path.name}")
         ds = dicom.dcmread(str(input_file_path))
+        if 'PixelData' not in ds:
+            print("No pixel data in this DICOM.")
+            return None
+
     except Exception as ex:
         print(f"unable to read dicom file: {ex} \n")
         return None
@@ -135,7 +132,7 @@ def read_input_dicom(input_file_path, filters, exclude):
     for key, value in d_filter.items():
         try:
             print(f"expected: {value} found: {ds.data_element(key)} exclude: {exclude} \n")
-            if value in str(ds.data_element(key)):
+            if any(v in str(ds.data_element(key)) for v in value.split("/")):
                 continue
             else:
                 if exclude:
