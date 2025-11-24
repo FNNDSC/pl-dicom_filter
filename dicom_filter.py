@@ -7,7 +7,6 @@ from chris_plugin import chris_plugin, PathMapper
 import pydicom as dicom
 import cv2
 import json
-# from pflog import pflog
 from pydicom.pixel_data_handlers import convert_color_space
 import numpy as np
 import re
@@ -35,7 +34,7 @@ parser.add_argument('-d', '--dicomFilter', default="{}", type=str,
                     help='comma separated dicom tags with values')
 parser.add_argument('-f', '--fileFilter', default='dcm', type=str,
                     help='input file filter glob')
-parser.add_argument('-m', '--minImgCount', default='1', type=int,
+parser.add_argument('-m', '--minImgCount', default=1, type=int,
                     help='A configurable threshold—any series with fewer images is dropped.')
 parser.add_argument('-V', '--version', action='version',
                     version=f'%(prog)s {__version__}')
@@ -162,6 +161,31 @@ def passes_filters(ds, conditions):
 
     return True
 
+def split_text(text, max_len=50):
+    """
+    Splits text into lines of at most `max_len` characters, preserving words.
+    """
+    words = text.split()
+    lines = []
+    current_line = ""
+
+    for word in words:
+        # Check if adding this word exceeds max_len
+        if len(current_line) + len(word) + 1 <= max_len:
+            if current_line:
+                current_line += " " + word
+            else:
+                current_line = word
+        else:
+            lines.append(current_line)
+            current_line = word
+
+    # Add the last line
+    if current_line:
+        lines.append(current_line)
+
+    return lines
+
 def extract_text_from_pixeldata(ds):
     """Return OCR-ed text from pixel data, or '' if unreadable."""
     try:
@@ -179,15 +203,13 @@ def extract_text_from_pixeldata(ds):
             return ""
 
         text = pytesseract.image_to_string(img)
-        return text.strip()
+        clean_text = " ".join(text.splitlines())
+        lines = split_text(clean_text)
+        return lines
 
     except Exception as e:
         print(f"OCR error: {e}")
         return ""
-
-
-
-
 
 # The main function of this *ChRIS* plugin is denoted by this ``@chris_plugin`` "decorator."
 # Some metadata about the plugin is specified here. There is more metadata specified in setup.py.
@@ -218,7 +240,7 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
 
     # Exit if minimum image count is not met
     if len(mapper)<options.minImgCount:
-        print(f"Total no. of images found ({len(mapper)}) is less than {options.minImgCount}. Exiting analysis..")
+        print(f"Total no. of images found ({len(mapper)}) is less than specified ({options.minImgCount}). Exiting analysis..")
         return
     print(f"Total no. of images found: {len(mapper)}")
 
@@ -281,8 +303,16 @@ def read_input_dicom(input_file_path, filter_expression, inspect_text):
     match = passes_filters(ds, conditions)
     print(f"Result: {'MATCH' if match else 'NO MATCH'}\n")
 
-    if inspect_text:
-        print(extract_text_from_pixeldata(ds))
+    # Run OCR if inspect_text == TRUE
+    if inspect_text and extract_text_from_pixeldata(ds):
+        lines_text = '\n'.join(extract_text_from_pixeldata(ds))
+        print(
+            f"\n########################## Detected Text #######################################"
+            f"\n{lines_text}"
+            f"\n################################################################################\n"
+        )
+
+        return None
 
     return ds if match else None
 
