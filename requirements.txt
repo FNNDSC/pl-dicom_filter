@@ -7,6 +7,5 @@ pylibjpeg
 pylibjpeg-libjpeg
 python-gdcm
 
-# for running OCR
 pillow
-pytesseract
+
