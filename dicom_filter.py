@@ -18,7 +18,7 @@ import os
 import sys
 from PIL import Image
 
-__version__ = '1.2.8'
+__version__ = '1.2.9'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -35,7 +35,7 @@ DISPLAY_TITLE = r"""
 
 parser = ArgumentParser(description='A ChRIS plugin to filter dicoms using filters on dicom tags',
                         formatter_class=ArgumentDefaultsHelpFormatter)
-parser.add_argument('-d', '--dicomFilter', default="{}", type=str,
+parser.add_argument('-d', '--dicomFilter', default="", type=str,
                     help='comma separated dicom tags with values')
 parser.add_argument('-f', '--fileFilter', default='dcm', type=str,
                     help='input file filter glob')
@@ -49,8 +49,10 @@ parser.add_argument('-t', '--textFilter', default='txt',
                     help='Input text file filter')
 parser.add_argument('-i', '--inspectTags',nargs="?", default=None, const="", type=str,
                     help='Comma separated DICOM tags')
-parser.add_argument('-p', '--phiMode', default="skip",
+parser.add_argument('-p', '--phiMode', default="skip", type=str,
                     help='PHI handling modes: detect, allow, or skip')
+parser.add_argument('-s', '--similarityThreshold', default=0.95,
+                    help='A similarity threshold represents the minimum similarity between two texts')
 
 
 class TagCondition:
@@ -212,7 +214,7 @@ def save_as_image(dcm_file, output_file_path, file_ext):
     cv2.imwrite(output_file_path,cv2.cvtColor(pixel_array_numpy,cv2.COLOR_RGB2BGR))
 
 
-def read_input_dicom(input_file_path, filter_expression, inspect_text, inspect_tags, phi_mode):
+def read_input_dicom(input_file_path, filter_expression, text_file, inspect_tags, phi_mode):
     """
     1) Read an input DICOM file
     2) Check if the DICOM headers match the specified filters
@@ -247,8 +249,8 @@ def read_input_dicom(input_file_path, filter_expression, inspect_text, inspect_t
         - "skip"   → skip PHI detection
         - "allow"  → allow PHI even if detected
     """
-    if inspect_text and phi_mode != "skip":
-        text = inspect_text.read_text(encoding="utf-8").split()
+    if text_file and phi_mode != "skip":
+        text = text_file.read_text(encoding="utf-8").split()
         phi_found = detect_phi(text, ds, inspect_tags)
         match phi_mode:
             case "detect":
@@ -267,7 +269,7 @@ def similarity(a, b):
     """Returns a similarity ratio between 0 and 1."""
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
-def detect_phi(text, ds, tags, threshold=0.80):
+def detect_phi(text, ds, tags, threshold=0.90):
     """
     Detects possible PHI in `text` by comparing it against the extracted
     DICOM text & dates, using exact, substring, and similarity matching.
