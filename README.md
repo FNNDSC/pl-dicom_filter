@@ -4,18 +4,21 @@
 [![MIT License](https://img.shields.io/github/license/fnndsc/pl-dicom_filter)](https://github.com/FNNDSC/pl-dicom_filter/blob/main/LICENSE)
 [![ci](https://github.com/FNNDSC/pl-dicom_filter/actions/workflows/ci.yml/badge.svg)](https://github.com/FNNDSC/pl-dicom_filter/actions/workflows/ci.yml)
 
-`pl-dicom_filter` is a [_ChRIS_](https://chrisproject.org/)
-_ds_ plugin which takes in DICOM files in its input directory and filters DICOMs that 
-matches a specified criteria into its output directory.
+`pl-dicom_filter` is a [_ChRIS_](https://chrisproject.org/) _ds_ plugin which takes in DICOM files in its input directory and filters DICOMs based on specified criteria into its output directory.
+
+---
 
 ## Abstract
 
-A ChRIS plugin to filter dicoms using filters on dicom tags.
+A ChRIS plugin to filter DICOM files using filters on DICOM tags, image count thresholds, and text similarity, with optional PHI handling.
+
+---
 
 ## Installation
 
-`pl-dicom_filter` is a _[ChRIS](https://chrisproject.org/) plugin_, meaning it can
-run from either within _ChRIS_ or the command-line.
+`pl-dicom_filter` is a _[ChRIS](https://chrisproject.org/) plugin_, meaning it can run either within _ChRIS_ or from the command line using container technologies such as [Apptainer](https://apptainer.org/).
+
+---
 
 ## Local Usage
 
@@ -31,6 +34,18 @@ To print its available options, run:
 ```shell
 apptainer exec docker://fnndsc/pl-dicom_filter dicom_filter --help
 ```
+| Argument                      | Default  | Description                                                      |
+| ----------------------------- | -------- | ---------------------------------------------------------------- |
+| `-d`, `--dicomFilter`         | `""`     | Comma-separated DICOM tags with values to filter files           |
+| `-f`, `--fileFilter`          | `"dcm"`  | Input file filter glob pattern                                   |
+| `-m`, `--minImgCount`         | `1`      | Minimum number of images in a series; smaller series are dropped |
+| `-o`, `--outputType`          | `"dcm"`  | Output file type/extension                                       |
+| `-t`, `--textFilter`          | `"txt"`  | Input text file filter (for additional filtering)                |
+| `-i`, `--inspectTags`         | `None`   | Comma-separated DICOM tags to inspect; optional                  |
+| `-p`, `--phiMode`             | `"skip"` | PHI handling mode: `detect`, `allow`, or `skip`                  |
+| `-s`, `--similarityThreshold` | `0.95`   | Minimum similarity threshold between two text entries            |
+| `-V`, `--version`             | —        | Show plugin version                                              |
+
 
 ## Examples
 
