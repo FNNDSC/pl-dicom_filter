@@ -34,17 +34,17 @@ To print its available options, run:
 ```shell
 apptainer exec docker://fnndsc/pl-dicom_filter dicom_filter --help
 ```
-| Argument                      | Default  | Description                                                      |
-| ----------------------------- | -------- | ---------------------------------------------------------------- |
-| `-d`, `--dicomFilter`         | `""`     | Comma-separated DICOM tags with values to filter files           |
-| `-f`, `--fileFilter`          | `"dcm"`  | Input file filter glob pattern                                   |
-| `-m`, `--minImgCount`         | `1`      | Minimum number of images in a series; smaller series are dropped |
-| `-o`, `--outputType`          | `"dcm"`  | Output file type/extension                                       |
-| `-t`, `--textFilter`          | `"txt"`  | Input text file filter (for additional filtering)                |
-| `-i`, `--inspectTags`         | `None`   | Comma-separated DICOM tags to inspect; optional                  |
-| `-p`, `--phiMode`             | `"skip"` | PHI handling mode: `detect`, `allow`, or `skip`                  |
-| `-s`, `--similarityThreshold` | `0.95`   | Minimum similarity threshold between two text entries            |
-| `-V`, `--version`             | —        | Show plugin version                                              |
+| Argument                      | Default  | Description                                            |
+|-------------------------------|----------|--------------------------------------------------------|
+| `-d`, `--dicomFilter`         | `""`     | Comma-separated DICOM tags with values to filter files |
+| `-f`, `--fileFilter`          | `"dcm"`  | Input file filter glob pattern                         |
+| `-m`, `--imgCount`            | `">=1"`  | Comma-separated image count filter expression.         |
+| `-o`, `--outputType`          | `"dcm"`  | Output file type/extension                             |
+| `-t`, `--textFilter`          | `"txt"`  | Input text file filter (for additional filtering)      |
+| `-i`, `--inspectTags`         | `None`   | Comma-separated DICOM tags to inspect; optional        |
+| `-p`, `--phiMode`             | `"skip"` | PHI handling mode: `detect`, `allow`, or `skip`        |
+| `-s`, `--similarityThreshold` | `0.95`   | Minimum similarity threshold between two text entries  |
+| `-V`, `--version`             | —        | Show plugin version                                    |
 
 
 ## Examples

@@ -7,18 +7,20 @@ from pydicom.sequence import Sequence
 from difflib import SequenceMatcher
 from argparse import ArgumentParser, Namespace, ArgumentDefaultsHelpFormatter
 from pydicom.pixel_data_handlers import convert_color_space
+from PIL import Image
 from chris_plugin import chris_plugin, PathMapper
+from pydicom.pixel_data_handlers import convert_color_space
 import pydicom as dicom
+import numpy as np
+import operator
 import cv2
 import json
-from pydicom.pixel_data_handlers import convert_color_space
-import numpy as np
 import re
 import os
 import sys
-from PIL import Image
 
-__version__ = '1.2.9'
+
+__version__ = '1.3.0'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
@@ -39,8 +41,15 @@ parser.add_argument('-d', '--dicomFilter', default="", type=str,
                     help='comma separated dicom tags with values')
 parser.add_argument('-f', '--fileFilter', default='dcm', type=str,
                     help='input file filter glob')
-parser.add_argument('-m', '--minImgCount', default=1, type=int,
-                    help='A configurable threshold—any series with fewer images is dropped.')
+parser.add_argument('-m', '--imgCount', default=">=1", type=str,
+                    help=(
+                        "Image count filter expression. "
+                        "Supports multiple conditions combined with AND.\n"
+                        "Examples:\n"
+                        "  '>=10 <=200'\n"
+                        "  '>5 !=13'\n"
+                        "  '==42'"
+                    ))
 parser.add_argument('-V', '--version', action='version',
                     version=f'%(prog)s {__version__}')
 parser.add_argument('-o', '--outputType', default='dcm', type=str,
@@ -475,6 +484,45 @@ def zipper_mapper(mapper1, mapper2, fill_value=None):
 
         yield (in1, in2, out1)
 
+OPS = {
+    ">": operator.gt,
+    ">=": operator.ge,
+    "<": operator.lt,
+    "<=": operator.le,
+    "==": operator.eq,
+    "!=": operator.ne,
+}
+
+_COND_RE = re.compile(r"(>=|<=|==|!=|>|<)\s*(\d+)$")
+
+
+def validate_img_count(count: int, expr: str) -> bool:
+    """
+    Validate image count against multiple AND-ed conditions.
+
+    Example expressions:
+        '>=10 <=200'
+        '>5 !=13'
+        '==42'
+    """
+    conditions = expr.split(',')
+
+    for cond in conditions:
+        match = _COND_RE.fullmatch(cond.strip())
+        if not match:
+            raise ValueError(
+                f"Invalid imgCount condition '{cond}'. "
+                "Valid examples: '>=10', '<=200', '!=13'"
+            )
+
+        op_str, value = match.groups()
+        value = int(value)
+
+        if not OPS[op_str](count, value):
+            return False
+
+    return True
+
 def check_setup_and_map(inputdir, outputdir, options):
     """
     Check the input file space
@@ -482,12 +530,21 @@ def check_setup_and_map(inputdir, outputdir, options):
     to yield a single mapper
     """
     dcm_mapper = PathMapper.file_mapper(inputdir, outputdir, glob=f"**/*.{options.fileFilter}", fail_if_empty=False)
+    count = len(dcm_mapper)
 
     # Exit if minimum image count is not met
-    if len(dcm_mapper) < options.minImgCount:
-        print(
-            f"Total no. of images found ({len(dcm_mapper)}) is less than specified ({options.minImgCount}). Exiting analysis..")
-        sys.exit()
+    try:
+        if not validate_img_count(count, options.imgCount):
+            print(
+                f"Total no. of images found ({count}) does not satisfy "
+                f"specified conditions ({options.imgCount}). "
+                "Exiting analysis.."
+            )
+            sys.exit(1)
+
+    except ValueError as e:
+        print(f"Argument error: {e}")
+        sys.exit(2)
     print(f"Total no. of images found: {len(dcm_mapper)}")
 
     text_mapper = PathMapper.file_mapper(inputdir, outputdir, glob=f"**/*.{options.textFilter}", fail_if_empty=False)
