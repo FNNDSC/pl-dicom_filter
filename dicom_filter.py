@@ -20,7 +20,7 @@ import os
 import sys
 
 
-__version__ = '1.3.0'
+__version__ = '1.3.1'
 
 DISPLAY_TITLE = r"""
        _           _ _                        __ _ _ _            
